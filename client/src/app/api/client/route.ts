@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/app/lib/mongodb';
-import User from '@/app/models/User';
+import Client from '@/app/models/User';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: NextRequest) {
@@ -15,13 +15,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user with the same email already exists
-    const existingUserByEmail = await User.findOne({ email });
+    const existingUserByEmail = await Client.findOne({ email });
     if (existingUserByEmail) {
       return NextResponse.json({ message: 'A user with this email already exists' }, { status: 400 });
     }
     
     // Check if user with the same phone number already exists
-    const existingUserByPhone = await User.findOne({ phone });
+    const existingUserByPhone = await Client.findOne({ phone });
     if (existingUserByPhone) {
         return NextResponse.json({ message: 'A user with this phone number already exists' }, { status: 400 });
     }
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create a new user in the database
-    const newUser = new User({
+    const newUser = new Client({
       name,
       email,
       phone,
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 
   try {
 
-    const user = await User.findOne().select("name email phone -_id");
+    const user = await Client.findOne().select("name email phone -_id");
     console.log("Fetch user:", user);
     if (!user) {
       return NextResponse.json({ message: "No user found" }, { status: 404 });
