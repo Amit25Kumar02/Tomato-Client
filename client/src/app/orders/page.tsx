@@ -163,7 +163,7 @@ const OrderCard = ({ order, onStatusChange }: OrderCardProps) => {
           id={`status-select-${order._id}`}
           value={order.status}
           onChange={(e) => onStatusChange(order._id, e.target.value)}
-          className={`w-full px-3 py-2 rounded-lg border focus:ring-rose-500 focus:border-rose-500 transition duration-150 cursor-pointer text-sm ${
+          className={`w-full px-2 py-2 rounded-lg border focus:ring-rose-500 focus:border-rose-500 transition duration-150 cursor-pointer text-sm ${
             order.status === "delivered"
               ? "bg-green-50 border-green-300 text-green-700"
               : order.status === "in process"

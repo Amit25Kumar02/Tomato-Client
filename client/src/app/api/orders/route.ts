@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
-    // Get userId from token
     const authHeader = req.headers.get("authorization");
     const userId = verifyToken(authHeader ?? undefined);
 
@@ -20,29 +19,32 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Find the restaurant owned by this user
-    const restaurant = await Restaurant.findOne({ userId });
+    const restaurants = await Restaurant.find({ userId });
 
-    if (!restaurant) {
+    if (!restaurants || restaurants.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Restaurant not found for this user" },
+        { success: false, error: "No restaurants found for this user" },
         { status: 404 }
       );
     }
 
-    // Fetch all orders linked to that restaurantId
+    const restaurantIds = restaurants.map((r) => r._id.toString());
+
     const orders = await Order.find({
-      restaurantId: restaurant._id.toString(),
+      restaurantId: { $in: restaurantIds },
     }).sort({ date: -1 });
 
-    //  Include restaurant coordinates in the response
+    const restaurantCoords = restaurants.map((r) => ({
+      restaurantId: r._id.toString(),
+      name: r.name,
+      latitude: r.latitude,
+      longitude: r.longitude,
+    }));
+
     return NextResponse.json(
       {
         success: true,
-        restaurantCoords: {
-          latitude: restaurant.latitude,
-          longitude: restaurant.longitude,
-        },
+        restaurantCoords,
         orders,
       },
       { status: 200 }
