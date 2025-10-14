@@ -28,7 +28,22 @@ interface Order {
   status: string;
   userId: string;
   customerName?: string;
-  userLocation?: { latitude: number; longitude: number; address?: string };
+  userLocation?: { latitude: number; longitude: number; address?: string; distance?: number };
+}
+
+// --- Helper: Distance in KM (Haversine formula) ---
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth radius (km)
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return parseFloat((R * c).toFixed(2)); // Distance in km
 }
 
 // --- STATUS CHIP COMPONENT ---
@@ -62,12 +77,6 @@ interface OrderCardProps {
 }
 
 const OrderCard = ({ order, onStatusChange }: OrderCardProps) => {
-  const getDirectionsLink = () => {
-    if (!order.userLocation) return "#";
-    const { latitude, longitude } = order.userLocation;
-    return `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-  };
-
   return (
     <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200 hover:shadow-lg transition duration-200">
       <div className="flex justify-between items-start mb-4 border-b pb-3">
@@ -109,20 +118,39 @@ const OrderCard = ({ order, onStatusChange }: OrderCardProps) => {
           <span className="flex-1 text-right">{new Date(order.date).toLocaleString("en-IN")}</span>
         </div>
 
-        {/* User Location */}
+        {/* USER LOCATION + DISTANCE */}
         {order.userLocation && (
-          <div className="flex items-center gap-2 pt-1 border-t border-dashed">
-            <MapPin size={16} className="text-rose-500" />
-            <span className="text-gray-800 font-medium">Address:</span>
-            <span className="flex-1 text-right">{order.userLocation.address || `${order.userLocation.latitude.toFixed(4)}, ${order.userLocation.longitude.toFixed(4)}`}</span>
-            <a
-              href={getDirectionsLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 bg-rose-600 text-white px-2 py-1 rounded text-xs hover:bg-rose-700 transition"
-            >
-              <Compass size={14} /> Directions
-            </a>
+          <div className="flex flex-col gap-2 pt-2 border-t border-dashed text-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MapPin size={16} className="text-rose-500" />
+                <span className="text-gray-800 font-medium">Address:</span>
+              </div>
+              <span className="text-right text-gray-700">
+                {order.userLocation.address ||
+                  `${order.userLocation.latitude.toFixed(4)}, ${order.userLocation.longitude.toFixed(4)}`}
+              </span>
+            </div>
+
+            {order.userLocation.distance && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Distance from Restaurant:</span>
+                <span className="font-semibold text-rose-600">
+                  {order.userLocation.distance} km
+                </span>
+              </div>
+            )}
+
+            <div className="flex justify-end mt-1">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${order.userLocation.latitude},${order.userLocation.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-rose-700 transition"
+              >
+                <Compass size={14} /> Directions
+              </a>
+            </div>
           </div>
         )}
       </div>
@@ -158,7 +186,6 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const router = useRouter();
 
   // Redirect if no token
@@ -167,7 +194,7 @@ export default function OrdersPage() {
     if (!token) router.push("/login");
   }, [router]);
 
-  // Fetch orders and attach geolocation if available
+  // Fetch orders + attach distance
   useEffect(() => {
     const fetchOrders = async () => {
       const token = localStorage.getItem("token");
@@ -178,22 +205,32 @@ export default function OrdersPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
+        const restaurantCoords = res.data.restaurantCoords;
+
         const ordersData: Order[] = await Promise.all(
           res.data.orders.map(async (o: any) => {
-            let userLocation: { latitude: number; longitude: number; address?: string } | undefined = undefined;
+            let userLocation: { latitude: number; longitude: number; address?: string; distance?: number } | undefined;
 
-            // If coordinates exist in order data, use them
-            if (o.userLat && o.userLon) {
-              userLocation = { latitude: o.userLat, longitude: o.userLon };
+            if (o.latitude && o.longitude) {
+              userLocation = {
+                latitude: o.latitude,
+                longitude: o.longitude,
+              };
 
-              // Optionally reverse geocode for address
+              // Calculate distance (Restaurant → User)
+              if (restaurantCoords?.latitude && restaurantCoords?.longitude) {
+                userLocation.distance = getDistanceKm(
+                  restaurantCoords.latitude,
+                  restaurantCoords.longitude,
+                  o.latitude,
+                  o.longitude
+                );
+              }
+
+              // Reverse geocode for address
               try {
                 const geoRes = await axios.get(`https://nominatim.openstreetmap.org/reverse`, {
-                  params: {
-                    format: "json",
-                    lat: o.userLat,
-                    lon: o.userLon,
-                  },
+                  params: { format: "json", lat: o.latitude, lon: o.longitude },
                 });
                 userLocation.address = geoRes.data.display_name;
               } catch (err) {

@@ -4,16 +4,14 @@ import dbConnect from "@/app/lib/mongodb";
 import Order from "@/app/models/order";
 import Restaurant from "@/app/models/Restaurant";
 import { verifyToken } from "@/app/lib/authMiddleware";
- 
 
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
-    //  Get userId from token
+    // Get userId from token
     const authHeader = req.headers.get("authorization");
     const userId = verifyToken(authHeader ?? undefined);
-    // console.log("Authenticated userId:", userId);
 
     if (!userId) {
       return NextResponse.json(
@@ -22,9 +20,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    //  Find the restaurant owned by this user
+    // Find the restaurant owned by this user
     const restaurant = await Restaurant.findOne({ userId });
-    // console.log("Authenticated restaurant:", restaurant);
 
     if (!restaurant) {
       return NextResponse.json(
@@ -33,11 +30,23 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    //  Fetch all orders linked to that restaurantId
-    const orders = await Order.find({ restaurantId: restaurant._id.toString() }).sort({ date: -1 });
-    // console.log(`Fetched ${orders.length} orders for restaurantId:`, restaurant._id);
+    // Fetch all orders linked to that restaurantId
+    const orders = await Order.find({
+      restaurantId: restaurant._id.toString(),
+    }).sort({ date: -1 });
 
-    return NextResponse.json({ success: true, orders }, { status: 200 });
+    //  Include restaurant coordinates in the response
+    return NextResponse.json(
+      {
+        success: true,
+        restaurantCoords: {
+          latitude: restaurant.latitude,
+          longitude: restaurant.longitude,
+        },
+        orders,
+      },
+      { status: 200 }
+    );
   } catch (err: any) {
     console.error("Error fetching orders:", err);
     return NextResponse.json(
@@ -46,7 +55,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-
-
-
-
