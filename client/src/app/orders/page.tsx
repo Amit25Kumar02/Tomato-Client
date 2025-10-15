@@ -295,7 +295,7 @@ export default function OrdersPage() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static z-20 bg-white shadow-md w-64 min-h-screen p-6 transition-transform duration-300 ${
+        className={`fixed z-20 bg-white shadow-md w-64 min-h-screen p-6 transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -329,15 +329,15 @@ export default function OrdersPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 md:p-10 md:ml-2 transition-all duration-300">
+      <main className="flex-1 p-6 md:p-10 md:ml-64 transition-all duration-300">
         <button
-          className="md:hidden mb-4 bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
+          className="fixed md:hidden mb-4 bg-rose-600 text-white px-2 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
           onClick={() => setSidebarOpen(true)}
         >
-          <MenuIcon size={18} /> Menu
+          <MenuIcon size={18} />Menu
         </button>
 
-        <h1 className="text-3xl font-bold text-rose-600 flex items-center gap-2 mb-6">
+        <h1 className="text-2xl md:text-3xl mt-12 md:mt-2 font-bold text-rose-600 flex items-center gap-2 mb-6">
           <ShoppingBag size={28} /> Order Management
         </h1>
 

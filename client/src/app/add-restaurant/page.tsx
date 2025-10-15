@@ -241,14 +241,14 @@ export default function AddRestaurantPage() {
       <main className="flex-1 ml-0 md:ml-2 p-6 md:p-10 overflow-y-auto h-screen">
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden mb-4 bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          className="fixed md:hidden mb-4 bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
           <MenuIcon size={18} />
           Menu
         </button>
 
-        <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+        <div className="max-w-3xl mt-12 md:mt-0 mx-auto bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
           <h1 className="text-3xl font-bold text-rose-600 mb-8 text-center">
             🏠 Add Your Restaurant
           </h1>

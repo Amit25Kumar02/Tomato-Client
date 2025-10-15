@@ -203,14 +203,14 @@ export default function ManageMenuPage() {
       {/* Main Content */}
       <main className="flex-1 ml-0 md:ml-2 p-6 md:p-10 overflow-y-auto h-screen">
         <button
-          className="md:hidden mb-4 bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
+          className="fixed md:hidden mb-4 bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
           onClick={() => setSidebarOpen(true)}
         >
           <MenuIcon size={18} />
           Menu
         </button>
 
-        <h1 className="text-3xl font-bold text-rose-600 mb-8 text-center">
+        <h1 className="mt-12 md:mt-0 text-2xl md:text-3xl font-bold text-rose-600 mb-8 text-center">
           Manage Restaurant Menus
         </h1>
 

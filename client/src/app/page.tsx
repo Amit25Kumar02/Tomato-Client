@@ -232,20 +232,20 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="flex-1 ml-0 md:ml-2 p-6 md:p-10 overflow-y-auto h-screen">
         <button
-          className="md:hidden mb-4 bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
+          className="fixed md:hidden mb-4 bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
           <MenuIcon size={18} />
           Menu
         </button>
 
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-rose-600 md:text-2xl sm:text-2xl">
+        <div className="flex justify-between items-center mt-10 md:mt-0 mb-6">
+          <h1 className="text-xl font-bold text-rose-600 md:text-2xl lg:text-4xl">
             Restaurant Dashboard
           </h1>
           <Link
             href="/add-restaurant"
-            className="bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 flex w-fit items-center gap-2 md:text-1xl cursor-pointer"
+            className="bg-rose-600 text-white px-2 py-2 rounded-lg hover:bg-rose-700 flex w-fit items-center gap-2 md:text-xl cursor-pointer"
           >
             <PlusCircle size={18} /> Add New
           </Link>
@@ -287,7 +287,10 @@ export default function DashboardPage() {
                     {r.name}
                   </h3>
                   <p className="text-gray-500 text-sm mb-1">
-                    🍜 {r.cuisine} • ⭐ {r.rating}
+                    🍜 {r.cuisine} 
+                  </p>
+                  <p className="text-gray-500 text-sm mb-1">
+                    ⭐ {r.rating}
                   </p>
                   <p className="text-gray-500 text-sm mb-3">
                     💸 {r.priceRange}
